@@ -104,6 +104,26 @@ export const authConfig: NextAuthConfig = {
   pages: { signIn: "/login", error: "/login" },
   trustHost: true,
   callbacks: {
+    async signIn({ user, account, profile }) {
+      // The adapter writes name and image only when it first creates a user,
+      // so an account that already existed — or whose provider profile has
+      // since changed — would keep stale details forever. Refresh them on each
+      // sign-in, and update `user` too so the new JWT carries the fresh values
+      // rather than waiting for the next login.
+      if (account && (account.type === "oauth" || account.type === "oidc") && user.id) {
+        const claims = (profile ?? {}) as Record<string, unknown>;
+        const name = typeof claims.name === "string" ? claims.name : (user.name ?? null);
+        const picture = claims.picture ?? claims.image ?? claims.avatar_url;
+        const image = typeof picture === "string" ? picture : (user.image ?? null);
+
+        if (name !== user.name || image !== user.image) {
+          await db.update(users).set({ name, image }).where(eq(users.id, user.id));
+          user.name = name;
+          user.image = image;
+        }
+      }
+      return true;
+    },
     jwt({ token, user }) {
       if (user?.id) token.uid = user.id;
       return token;
