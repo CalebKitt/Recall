@@ -95,13 +95,48 @@ The app uses `gemini-3.6-flash` with a low thinking level (these are simple task
 
 ---
 
-## Deploying to Vercel
+## Going live: Neon + Vercel
 
-1. Push this repository to GitHub.
-2. [vercel.com](https://vercel.com) → **Add New → Project** → import the repo.
-3. Add every variable from `.env.example` under **Settings → Environment Variables**. Do **not** set `AUTH_DEV_LOGIN`.
-4. Set `NEXTAUTH_URL` to your deployed origin, and add `https://YOUR-DOMAIN/api/auth/callback/google` to the Google credentials.
-5. Deploy, then run `npm run db:migrate` once against the production `DATABASE_URL`.
+### 1. Create the database
+
+1. Make a project at [neon.tech](https://neon.tech) and copy the **pooled** connection string.
+2. Create the tables in it:
+
+```bash
+DATABASE_URL="<neon-connection-string>" npm run db:migrate
+```
+
+### 2. Move your existing data across (optional)
+
+Stop `npm run dev` and `node scripts/dev-db.mjs` first — the local database
+serves a single connection and the app holds it.
+
+```bash
+node scripts/migrate-to-cloud.mjs "<neon-connection-string>"
+```
+
+Decks, cards, scheduling, review history, streaks and settings are copied with
+their original ids. It is safe to run twice; existing rows are skipped.
+
+### 3. Set up Google sign-in
+
+Follow the Google steps above, and add **both** redirect URIs to the same OAuth
+client: `http://localhost:3000/api/auth/callback/google` and
+`https://YOUR-DOMAIN/api/auth/callback/google`.
+
+### 4. Deploy
+
+1. Push the repository to GitHub.
+2. [vercel.com](https://vercel.com) → **Add New → Project** → import it.
+3. Under **Settings → Environment Variables** add `DATABASE_URL`, `AUTH_SECRET`,
+   `ENCRYPTION_KEY`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, and optionally
+   `GEMINI_API_KEY`. Do **not** set `AUTH_DEV_LOGIN`, `DB_POOL_MAX` or
+   `DB_IDLE_TIMEOUT` — the last two exist only for the bundled dev database.
+4. Set `NEXTAUTH_URL` to your deployed origin.
+5. Deploy.
+
+`ENCRYPTION_KEY` must be the same value you used locally, or personal Gemini
+keys already stored in the database cannot be decrypted.
 
 The free Hobby tier and Neon's free tier are enough to run this for yourself.
 
