@@ -350,10 +350,32 @@ export async function suggestCards(args: {
   return { scope: (data.scope ?? "").trim(), cards };
 }
 
-/** Cheap validity probe used by the settings screen when saving a personal key. */
+/**
+ * Check that a key works, when someone saves their own in Settings.
+ *
+ * Deliberately asks whether the key can list models at all, rather than probing
+ * one model: a perfectly good key whose project lacks access to the current
+ * default would otherwise be rejected on save, even though the fallback model
+ * would have served it fine. The single-model probe stays as a backstop for
+ * keys allowed to call a model but not to list them.
+ */
 export async function verifyApiKey(apiKey: string, model = DEFAULT_MODEL): Promise<boolean> {
+  const headers = { "x-goog-api-key": apiKey };
+
+  try {
+    const listed = await fetch(`${API_BASE}?pageSize=1`, {
+      headers,
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (listed.ok) return true;
+    // 401/403 mean the key itself is bad; no other request will do better.
+    if (listed.status === 401 || listed.status === 403) return false;
+  } catch {
+    // Network trouble: fall through and try the model probe before giving up.
+  }
+
   const res = await fetch(`${API_BASE}/${encodeURIComponent(model)}`, {
-    headers: { "x-goog-api-key": apiKey },
+    headers,
     signal: AbortSignal.timeout(10_000),
   });
   return res.ok;
