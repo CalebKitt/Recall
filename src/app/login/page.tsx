@@ -28,9 +28,8 @@ export default async function LoginPage({
     <main className="flex min-h-dvh items-center justify-center px-5 py-12">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-accent text-2xl text-accent-text">
-            ⌘
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="" className="mx-auto mb-4 size-14 rounded-2xl" />
           <h1 className="text-2xl font-semibold tracking-tight text-text">Recall</h1>
           <p className="mt-2 text-sm text-muted">
             Spaced repetition that adapts the wording, so you learn the material — not the question.

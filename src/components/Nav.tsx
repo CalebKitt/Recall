@@ -78,9 +78,9 @@ export function Nav({ userName, userImage }: { userName?: string | null; userIma
       <header className="sticky top-0 z-40 hidden border-b border-border bg-surface/85 backdrop-blur sm:block">
         <div className="mx-auto flex h-14 max-w-5xl items-center gap-1 px-5">
           <Link href="/decks" className="mr-4 flex items-center gap-2 font-semibold text-text">
-            <span className="flex size-7 items-center justify-center rounded-lg bg-accent text-sm text-accent-text">
-              ⌘
-            </span>
+            {/* The icon carries its own background, so no accent tile behind it. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="" className="size-7 rounded-lg" />
             Recall
           </Link>
 
@@ -145,9 +145,8 @@ export function Nav({ userName, userImage }: { userName?: string | null; userIma
       {/* Mobile top bar: identity + streak only, navigation lives at the bottom */}
       <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-border bg-surface/85 px-4 backdrop-blur sm:hidden">
         <Link href="/decks" className="flex items-center gap-2 font-semibold text-text">
-          <span className="flex size-7 items-center justify-center rounded-lg bg-accent text-sm text-accent-text">
-            ⌘
-          </span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="" className="size-7 rounded-lg" />
           Recall
         </Link>
         <div className="ml-auto flex items-center gap-2">
